@@ -46,7 +46,7 @@ public class TesterDream
     public String postProcess(String source, Language lang)
     {
         StringBuffer newSource = new StringBuffer(source);
-        newSource.append("\n// Powered by TesterDream 1.2");
+        newSource.append("\n// Powered by TesterDream 1.2.1");
         return newSource.toString();
     }
 
@@ -69,12 +69,10 @@ public class TesterDream
         code.append("\tif (argc == 1) \n");
         code.append("\t{\n");
         code.append("\t\tcout << \"Testing "+m_ProblemName+" ("+m_Points+" points)\" << endl << endl;\n");
-        code.append("\t\tfor (int i = 0; ; i++)\n");
+        code.append("\t\tfor (int i = 0; i < 20; i++)\n");
         code.append("\t\t{\n");
         code.append("\t\t\tostringstream s; s << argv[0] << \" \" << i;\n");
         code.append("\t\t\tint exitCode = system(s.str().c_str());\n");
-        code.append("\t\t\tif (exitCode == 1024)\n");
-        code.append("\t\t\t\tbreak;\n");
         code.append("\t\t\tif (exitCode)\n");
         code.append("\t\t\t\tcout << \"#\" << i << \": Runtime Error\" << endl;\n");
         code.append("\t\t}\n");
@@ -224,7 +222,7 @@ public class TesterDream
             code.append("); break;\n");
             code.append("\t\t\t}*/\n");
         }
-        code.append("\t\t\tdefault: return 4;\n");
+        code.append("\t\t\tdefault: return 0;\n");
         code.append("\t\t}\n");
     }
 
