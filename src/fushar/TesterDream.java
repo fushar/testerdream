@@ -7,6 +7,12 @@ import com.topcoder.shared.problem.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The main class of the plugin.
+ * 
+ * @author fushar
+ * @version 1.2.3
+ */
 public class TesterDream
 {
 	private HashMap
@@ -21,6 +27,15 @@ public class TesterDream
 	private double 		m_Points;
 	private long		m_Time;
 	
+	/**
+	 * Called once when a problem is opened, and returns the modified source code.
+	 * 
+	 * @param source The existing source which will be blank (if first opened), writer supplied source code or source code from the last save/test/compile.
+	 * @param problem The problem description.
+	 * @param lang The selected language.
+	 * @param render The problem renderer.
+	 * @return A string representing the source after modification.
+	 */
 	public String preProcess(String source, ProblemComponentModel problem, Language lang, Renderer render)
 	{
 		m_ReturnType = problem.getReturnType();
@@ -43,18 +58,33 @@ public class TesterDream
 		return "";
 	}
 	
+	/**
+	 * Returns a modified source code before it is returned to the applet.
+	 * 
+	 * @param source The modified source code from preProcess() method.
+	 * @param lang The selected language
+	 * @return The final source code to be returned to the applet.
+	 */
 	public String postProcess(String source, Language lang)
 	{
 		StringBuffer newSource = new StringBuffer(source);
-		newSource.append("\n// Powered by TesterDream 1.2.2 by fushar (Dec 27 2011)");
+		newSource.append("\n// Powered by TesterDream 1.2.3 by fushar (Dec 27 2011)");
 		return newSource.toString();
 	}
 	
+	/**
+	 * Returns a Map that has the tag to replace as the key and the source code to replace that tag as the value.
+	 * @return The defined tags map.
+	 */
 	public Map<String, String> getUserDefinedTags()
     {
         return m_Tags;
     }
 	
+	/**
+	 * Generates and appends the main() code.
+	 * @param code The current source code.
+	 */
 	private void generateMainCode(StringBuffer code)
 	{
 		code.append("#include <ctime>\n");
@@ -93,6 +123,10 @@ public class TesterDream
 		code.append("}\n");
 	}
 	
+	/**
+	 * Generates and appends the output verification code.
+	 * @param code The current source code.
+	 */
 	private void generateVerifyCode(StringBuffer code)
 	{
 		code.append("\t\tcout.setf(ios::fixed,ios::floatfield);\n");
@@ -160,6 +194,10 @@ public class TesterDream
 		code.append("\t\t}\n");
 	}
 	
+	/**
+	 * Generates and appends the test cases code.
+	 * @param code The current source code.
+	 */
 	private void generateTestCode(StringBuffer code)
 	{
 		code.append("\t\t"+m_ProblemName+" _obj;\n");
@@ -226,6 +264,14 @@ public class TesterDream
 		code.append("\t\t}\n");
 	}
 	
+	/**
+	 * Generates and appends the parameter code.
+	 * @param code The current source code.
+	 * @param front Whether the type should be present before the variable.
+	 * @param type The type of the variable.
+	 * @param name The name of the variable.
+	 * @param value The value of the variable.
+	 */
 	private void generateParameterCode(StringBuffer code, boolean front, DataType type, String name, String value)
 	{
 		code.append("\t\t\t\t");
@@ -256,7 +302,7 @@ public class TesterDream
 				for (int j = 0; j < typeName.length(); j++)
 					code.append(" ");
 				code.append(values[i]);
-				//if (type.getBaseName().toLowerCase().equals("long"))
+				if (type.getBaseName().toLowerCase().equals("long"))
 					code.append("LL");
 			}
 			code.append(";\n");
