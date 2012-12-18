@@ -9,9 +9,9 @@ import java.util.Map;
 
 /**
  * The main class of the plugin.
- * 
+ *
  * @author fushar
- * @version 1.2.3
+ * @version 1.2.4
  */
 public class TesterDream
 {
@@ -26,10 +26,10 @@ public class TesterDream
 	private String[]	m_ParamNames;
 	private double 		m_Points;
 	private long		m_Time;
-	
+
 	/**
 	 * Called once when a problem is opened, and returns the modified source code.
-	 * 
+	 *
 	 * @param source The existing source which will be blank (if first opened), writer supplied source code or source code from the last save/test/compile.
 	 * @param problem The problem description.
 	 * @param lang The selected language.
@@ -47,20 +47,20 @@ public class TesterDream
 		m_ParamNames = problem.getParamNames();
 		m_Time		 = System.currentTimeMillis()/1000;
 		m_Language 	 = lang;
-		
+
 		m_Tags = new HashMap<String, String>();
-		
+
 		StringBuffer code = new StringBuffer();
-		
+
 		generateMainCode(code);
-		
+
 		m_Tags.put("$TESTCODE$", code.toString());
 		return "";
 	}
-	
+
 	/**
 	 * Returns a modified source code before it is returned to the applet.
-	 * 
+	 *
 	 * @param source The modified source code from preProcess() method.
 	 * @param lang The selected language
 	 * @return The final source code to be returned to the applet.
@@ -68,10 +68,10 @@ public class TesterDream
 	public String postProcess(String source, Language lang)
 	{
 		StringBuffer newSource = new StringBuffer(source);
-		newSource.append("\n// Powered by TesterDream 1.2.3 by fushar (Dec 27 2011)");
+		newSource.append("\n// Powered by TesterDream 1.2.4 by fushar (December 19 2012)");
 		return newSource.toString();
 	}
-	
+
 	/**
 	 * Returns a Map that has the tag to replace as the key and the source code to replace that tag as the value.
 	 * @return The defined tags map.
@@ -80,7 +80,18 @@ public class TesterDream
     {
         return m_Tags;
     }
-	
+
+	/**
+	 * Gets the base name of a type.
+	 * @param type The type.
+	 */
+	private String getBaseName(DataType type)
+	{
+		if (type.getBaseName().toLowerCase().equals("long"))
+			return "long long";
+		return type.getBaseName().toLowerCase();
+	}
+
 	/**
 	 * Generates and appends the main() code.
 	 * @param code The current source code.
@@ -122,7 +133,7 @@ public class TesterDream
 		code.append("\t}\n");
 		code.append("}\n");
 	}
-	
+
 	/**
 	 * Generates and appends the output verification code.
 	 * @param code The current source code.
@@ -131,7 +142,7 @@ public class TesterDream
 	{
 		code.append("\t\tcout.setf(ios::fixed,ios::floatfield);\n");
 		code.append("\t\tcout.precision(2);\n");
-		code.append("\t\tdouble _elapsed = (double)(clock()-_start)/CLOCKS_PER_SEC;\n"); 
+		code.append("\t\tdouble _elapsed = (double)(clock()-_start)/CLOCKS_PER_SEC;\n");
 		// If return type is double or vector<double>
 		if (m_ReturnType.getDescriptor(m_Language).equals("double"))
 			code.append("\t\tif (abs(_expected-_received) < 1e-9 || (_received > min(_expected*(1.0-1e-9), _expected*(1.0+1e-9)) && _received < max(_expected*(1.0-1e-9), _expected*(1.0+1e-9))))\n");
@@ -148,11 +159,11 @@ public class TesterDream
 		code.append("\t\telse\n");
 		code.append("\t\t{\n");
 		code.append("\t\t\tcout << \"#\" << _tc << \": Failed (\" << _elapsed << \" secs)\" << endl;\n");
-		
+
 		// Set precision to 10
 		if (m_ReturnType.getBaseName().toLowerCase().equals("double"))
 			code.append("\t\t\tcout.precision(10);\n");
-		
+
 		if (m_ReturnType.getDimension() == 0)
 		{
 			// If return type is string, surround output with "
@@ -179,7 +190,7 @@ public class TesterDream
 				code.append("\t\t\t\tcout << \" \" << _expected[i];\n");
 			code.append("\t\t\t}\n");
 			code.append("\t\t\tcout << \" }\" << endl;\n");
-			
+
 			code.append("\t\t\tcout << \"           Received: {\";\n");
 			code.append("\t\t\tfor (unsigned i = 0; i < _received.size(); i++)\n");
 			code.append("\t\t\t{\n");
@@ -193,7 +204,7 @@ public class TesterDream
 		}
 		code.append("\t\t}\n");
 	}
-	
+
 	/**
 	 * Generates and appends the test cases code.
 	 * @param code The current source code.
@@ -212,13 +223,13 @@ public class TesterDream
 			code.append("\t\t\t{\n");
 			for (int j = 0; j < m_ParamTypes.length; j++)
 				generateParameterCode(code, true, m_ParamTypes[j], m_ParamNames[j], input[j]);
-			
+
 			if (m_ReturnType.getDimension() == 0)
 				generateParameterCode(code, false, m_ReturnType, "_expected", output);
 			else
 			{
 				generateParameterCode(code, true, m_ReturnType, "__expected", output);
-				code.append("\t\t\t\t_expected = "+m_ReturnType.getDescriptor(m_Language)+"(__expected, __expected+sizeof(__expected)/sizeof("+m_ReturnType.getBaseName().toLowerCase()+"));\n");
+				code.append("\t\t\t\t_expected = "+m_ReturnType.getDescriptor(m_Language)+"(__expected, __expected+sizeof(__expected)/sizeof(" + getBaseName(m_ReturnType) + "));\n");
 			}
 			code.append("\t\t\t\t_received = _obj."+m_MethodName+"(");
 			for (int j = 0; j < m_ParamNames.length; j++)
@@ -227,12 +238,12 @@ public class TesterDream
 				if (m_ParamTypes[j].getDimension() == 0)
 					code.append(m_ParamNames[j]);
 				else
-					code.append(m_ParamTypes[j].getDescriptor(m_Language)+"("+m_ParamNames[j]+", "+m_ParamNames[j]+"+sizeof("+m_ParamNames[j]+")/sizeof("+m_ParamTypes[j].getBaseName().toLowerCase()+"))");
+					code.append(m_ParamTypes[j].getDescriptor(m_Language)+"("+m_ParamNames[j]+", "+m_ParamNames[j]+"+sizeof("+m_ParamNames[j]+")/sizeof(" + getBaseName(m_ParamTypes[j]) + "))");
 			}
 			code.append("); break;\n");
 			code.append("\t\t\t}\n");
 		}
-		
+
 		// Custom test cases
 		for (int i = 0; i < 3; i++)
 		{
@@ -240,13 +251,13 @@ public class TesterDream
 			code.append("\t\t\t{\n");
 			for (int j = 0; j < m_ParamTypes.length; j++)
 				generateParameterCode(code, true, m_ParamTypes[j], m_ParamNames[j], "");
-			
+
 			if (m_ReturnType.getDimension() == 0)
 				generateParameterCode(code, false, m_ReturnType, "_expected", "");
 			else
 			{
 				generateParameterCode(code, true, m_ReturnType, "__expected", "");
-				code.append("\t\t\t\t_expected = "+m_ReturnType.getDescriptor(m_Language)+"(__expected, __expected+sizeof(__expected)/sizeof("+m_ReturnType.getBaseName().toLowerCase()+"));\n");
+				code.append("\t\t\t\t_expected = "+m_ReturnType.getDescriptor(m_Language)+"(__expected, __expected+sizeof(__expected)/sizeof("+getBaseName(m_ReturnType)+"));\n");
 			}
 			code.append("\t\t\t\t_received = _obj."+m_MethodName+"(");
 			for (int j = 0; j < m_ParamNames.length; j++)
@@ -255,7 +266,7 @@ public class TesterDream
 				if (m_ParamTypes[j].getDimension() == 0)
 					code.append(m_ParamNames[j]);
 				else
-					code.append(m_ParamTypes[j].getDescriptor(m_Language)+"("+m_ParamNames[j]+", "+m_ParamNames[j]+"+sizeof("+m_ParamNames[j]+")/sizeof("+m_ParamTypes[j].getBaseName().toLowerCase()+"))");
+					code.append(m_ParamTypes[j].getDescriptor(m_Language)+"("+m_ParamNames[j]+", "+m_ParamNames[j]+"+sizeof("+m_ParamNames[j]+")/sizeof("+getBaseName(m_ParamTypes[j])+"))");
 			}
 			code.append("); break;\n");
 			code.append("\t\t\t}*/\n");
@@ -263,7 +274,7 @@ public class TesterDream
 		code.append("\t\t\tdefault: return 0;\n");
 		code.append("\t\t}\n");
 	}
-	
+
 	/**
 	 * Generates and appends the parameter code.
 	 * @param code The current source code.
@@ -280,7 +291,7 @@ public class TesterDream
 			String sfront = "";
 			if (front)
 				sfront = type.getDescriptor(m_Language)+ " ";
-			
+
 			if (type.getBaseName().toLowerCase().equals("long"))
 				code.append(sfront + name + " = " + value + "LL;\n");
 			else
@@ -294,7 +305,7 @@ public class TesterDream
 			else
 				typeName = type.getBaseName().toLowerCase()+ " " + name + "[] = ";
 			String[] values = value.split("\n");
-			
+
 			code.append(typeName+values[0]);
 			for (int i = 1; i < values.length; i++)
 			{
