@@ -1,0 +1,5 @@
+bin/*
+jar/*
+dist/*
+*.sublime-project
+*.sublime-workspace
