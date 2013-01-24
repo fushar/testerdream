@@ -11,7 +11,7 @@ import java.util.Map;
  * The main class of the plugin.
  *
  * @author fushar
- * @version 1.2.4
+ * @version 1.3
  */
 public class TesterDream
 {
