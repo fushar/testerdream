@@ -50,7 +50,11 @@ public class TesterDream
 		languages = lang;
 		
 		StringBuffer code = new StringBuffer();
-		generateMainCode(code);
+    if (lang.getName() == "C++") {
+      generateMainCode(code);
+    } else {
+      generatePyMainCode(code);
+    }
 		
 		tags = new HashMap<String, String>();
 		tags.put("$TESTCODE$", code.toString());
@@ -68,7 +72,11 @@ public class TesterDream
 	public String postProcess(String source, Language lang)
 	{
 		StringBuffer newSource = new StringBuffer(source);
-		newSource.append("\n// Powered by TesterDream 1.2.4 by fushar (December 19 2012)");
+    if (lang.getName() == "C++") {
+      newSource.append("\n// Powered by TesterDream 1.2.4 by fushar (December 19 2012)");
+    } else {
+      newSource.append("\n// Powered by TesterDream 1.2.4 by fushar. Pythonized by dolphinigle.\n");
+    }
 		return newSource.toString();
 	}
 	
@@ -142,6 +150,55 @@ public class TesterDream
 		code.append("}\n");
 	}
 	
+	private void generatePyMainCode(StringBuffer code)
+	{
+    code.append("'''\n");
+		code.append("if __name__ == '__main__':\n");
+		code.append("  import sys\n");
+		code.append("  import subprocess\n");
+		code.append("  if len(sys.argv) == 1:\n");
+		code.append("    print 'Testing " + problemName + "(" + points + " points)'\n");
+		code.append("    for i in xrange(20):\n");
+    code.append("      if subprocess.call(['python'] + sys.argv + [str(i)]):\n");
+    code.append("        print '#{0}: Runtime Error'.format(i)\n");
+		code.append("  else:\n");
+		code.append("    _tc = int(sys.argv[1])\n");
+		generatePyTestCode(code);
+		generatePyVerifyCode(code);
+    code.append("'''\n");
+	}
+
+
+	/**
+	 * Generates and appends the output verification code.
+	 * 
+	 * @param code The currently generated source code.
+	 */
+	private void generatePyVerifyCode(StringBuffer code)
+	{
+		// If return type is double or vector<double>
+    code.append("    def _CheckDouble(d1, d2):\n");
+    code.append("      return abs(d1 - d2) < 1e-9 or (d2 > min([d1 * (1.0 - 1e-9), d1 * (1.0 + 1e-9)]) and d2 < max([d1 * (1.0 - 1e-9), d1 * (1.0 + 1e-9)]))\n");
+		if (returnType.getBaseName().equals("double") && returnType.getDimension() == 0) {
+      code.append("    if _CheckDouble(_expected, _receive):\n");
+    } else if (returnType.getBaseName().equals("double") && returnType.getDimension() == 1) {
+      code.append("    _passed = False\n");
+      code.append("    for _ex, _re in zip(_expected, _received):\n");
+      code.append("      _passed = _passed and _CheckDouble(_ex, _re)\n");
+			code.append("    if _passed:\n");
+		}
+		else {
+			code.append("    if _received == _expected:\n");
+    }
+    code.append("      print '#{0} Passed'.format(_tc)\n");
+		code.append("    else:\n");
+    code.append("      print '#{0} Failed :-('.format(_tc)\n");
+		
+    code.append("      print 'Expected: {0}'.format(_expected)\n");
+    code.append("      print 'Received: {0}'.format(_received)\n");
+	}
+	
+
 	/**
 	 * Generates and appends the output verification code.
 	 * 
@@ -292,6 +349,34 @@ public class TesterDream
 		code.append("\t\t\tdefault: return 0;\n");
 		code.append("\t\t}\n");
 	}
+
+	private void generatePyTestCode(StringBuffer code)
+	{
+		code.append("    _obj = " + problemName + "()\n");
+    code.append("    _expected = None\n");
+    code.append("    _received = None\n");
+		for (int i = 0; i < testCases.length; i++)
+		{
+			code.append("    if _tc == " + i + ":\n");
+			String[] input = testCases[i].getInput();
+			String output = testCases[i].getOutput();
+			for (int j = 0; j < paramTypes.length; j++)
+				generatePyParameterCode(code, true, paramTypes[j], paramNames[j], input[j]);
+			
+			if (returnType.getDimension() == 0)
+				generatePyParameterCode(code, false, returnType, "_expected", output);
+			else
+			{
+				generatePyParameterCode(code, true, returnType, "_expected", output);
+			}
+			code.append("      _received = _obj." + methodName + "(");
+			for (int j = 0; j < paramNames.length; j++)
+			{
+        code.append(paramNames[j] + ", ");
+			}
+			code.append(")\n");
+		}
+	}
 	
 	/**
 	 * Generates and appends the parameter code.
@@ -332,4 +417,19 @@ public class TesterDream
 			code.append(";\n");
 		}
 	}
+
+
+	private void generatePyParameterCode(StringBuffer code, boolean front, DataType type, String name, String value)
+	{
+		code.append("      ");
+		if (type.getDimension() == 0)
+		{
+      code.append(name + " = " + value + "\n");
+		}
+		else
+		{
+      code.append(name + " = [" + value.substring(1, value.length() - 1) + "]\n");
+		}
+	}
+
 }
