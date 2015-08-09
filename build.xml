@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="TesterDream" default="main" basedir=".">
-  <property name="version" value="v1.3.0"/>
+  <property name="version" value="v1.3.1"/>
   <property name="src.dir" location="src" />
   <property name="lib.dir" location="lib" />
   <property name="dist.dir" location="dist" />

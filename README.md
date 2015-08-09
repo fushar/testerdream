@@ -4,7 +4,7 @@ TesterDream - A TopCoder Arena Plugin
 Downloading TesterDream
 -----------------------
 
-Download the latest version here: https://github.com/fushar/testerdream/releases/download/v1.3.0/TesterDream-v1.3.0.zip
+Download the latest version here: https://github.com/fushar/testerdream/releases/download/v1.3.1/TesterDream-v1.3.1.zip
 
 Installing TesterDream in TopCoder Arena
 ----------------------------------------

@@ -11,7 +11,7 @@ import java.util.Map;
  * The main class of the plugin.
  *
  * @author fushar
- * @version 1.3.0
+ * @version 1.3.1
  */
 public class TesterDream
 {
@@ -68,7 +68,7 @@ public class TesterDream
 	public String postProcess(String source, Language lang)
 	{
 		StringBuffer newSource = new StringBuffer(source);
-		newSource.append("\n// Powered by TesterDream 1.3.0 by fushar (August 8 2015)");
+		newSource.append("\n// Powered by TesterDream 1.3.1 by fushar (August 9 2015)");
 		return newSource.toString();
 	}
 
